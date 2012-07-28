@@ -1,3 +1,4 @@
+{- Parsing code for hrolldice. -}
 module RollDice.Parser
   (
       RollStatement (..)
@@ -68,7 +69,9 @@ rollcount = do
 -- | "4d6" means roll four six-sided dice. This parser parses
 -- | the "4".
 dicecount :: Parser Int
-dicecount = many1 digit >>= return . read
+dicecount = do
+  digs <- many1 digit
+  return . read $ digs
 
 -- | "s2" means drop the two lowest rolls.
 dropcount :: Parser Int

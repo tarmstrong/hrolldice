@@ -1,6 +1,6 @@
 {- Functions and data types for rolling dice (with random number
    generation) and processing user input. -}
-module RollDice.Roller (runRoll, rollRoll, Roll (..), rollRoll', roll1Roll, runRollMaybe ) where
+module RollDice.Roller (runRoll, rollRoll, Roll (..), rollRoll', roll1Roll, runRollMaybe, rollStatement2Roll ) where
 
 import qualified RollDice.Parser as P -- (parseRollStatement, RollStatement)
 import System.Random
@@ -55,14 +55,16 @@ rollRoll gen str = do
 -- | Like rollRoll but accepts a Roll as an argument.
 rollRoll' :: RandomGen g => g -> Roll -> [Int]
 rollRoll' gen roll = do
-  [1..(rollCount roll)]
-  return $ roll1Roll gen roll
+    i <- [1..(rollCount roll)]
+    return $ roll1Roll (mkStdGen $ (randoms gen) !! i) roll
+  where nsides = sideCount roll
 
 -- | Roll a single roll. This ignores only the 'rollCount' component
 -- | of the Roll.
 roll1Roll :: RandomGen g => g -> Roll -> Int
-roll1Roll gen roll = sum . (drop ndrops) . sort . (applyMods (modFuns roll)) $ take ndice $ randomWithSides gen nsides
-  where ndrops = dropCount roll
+roll1Roll gen roll = result
+  where result = sum . (drop ndrops) . sort . (applyMods (modFuns roll)) $ take ndice $ randomWithSides gen nsides
+        ndrops = dropCount roll
         nsides = sideCount roll
         ndice = diceCount roll
 
@@ -81,6 +83,6 @@ rollStatement2Roll stmt = Roll {
                 rollCount = maybe 1 id (P.rollCount stmt)
               , diceCount = maybe 1 id (P.diceCount stmt)
               , sideCount = P.sideCount stmt
-              , dropCount = maybe 1 id (P.dropCount stmt)
+              , dropCount = maybe 0 id (P.dropCount stmt)
               , modFuns =  P.modFuns stmt}
 

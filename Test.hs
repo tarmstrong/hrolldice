@@ -1,6 +1,4 @@
-{- QuickCheck tests for hrolldice.
-   Tavish Armstrong (c) 2012
--}
+{- QuickCheck tests for hrolldice. -}
 import Test.QuickCheck
 import System.Random (mkStdGen)
 import RollDice.Parser (RollStatement, maybeParseRollStatement)
@@ -12,6 +10,7 @@ main = do
   quickCheck prop_acceptAllGoodRolls
   quickCheck prop_acceptNoBadRolls
   quickCheck prop_rollsFollowRules
+  quickCheck prop_goodRollsFollowRules
 
 
 goodRollStatements = [
@@ -34,9 +33,23 @@ prop_acceptNoBadRolls = forAll (elements badRollStatements) (\s -> (isJust . may
 -- | For a given roll with ndrops > ndice, it should
 -- | be within certain bounds. Verify this.
 -- | Remove modFuns for easier testing.
-prop_rollsFollowRules r i = ndice > ndrops ==> all id rules
+prop_rollsFollowRules r i = ndice > ndrops ==> verifyResult r i n
   where n = roll1Roll (mkStdGen i) (removeMF r)
-        nsides = sideCount r
+        ndice = diceCount r
+        ndrops = dropCount r
+
+-- | Make sure all the good roll strings end up with valid results.
+prop_goodRollsFollowRules i = forAll (elements goodRollStatements) goodvalues
+  where goodvalues str = do
+          case maybeParseRollStatement str of
+            Nothing -> False
+            Just rs -> do
+              let cleanRoll = (removeMF . rollStatement2Roll) rs
+                  result = rollRoll' (mkStdGen i) cleanRoll
+              all id $ map (verifyResult cleanRoll i) result
+
+verifyResult r i n = all id rules
+  where nsides = sideCount r
         ndice = diceCount r
         ndrops = dropCount r
         modfuns = modFuns r
