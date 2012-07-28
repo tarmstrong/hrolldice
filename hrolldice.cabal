@@ -47,7 +47,7 @@ executable hrolldice
   main-is: RollDice.hs
   
   -- Modules included in this executable, other than Main.
-  other-modules: RollDice.Parser
+  other-modules: RollDice.Parser, RollDice.Roller
   
   -- Other library packages from which modules are imported.
   build-depends:       base ==4.5.*

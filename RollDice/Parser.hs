@@ -1,4 +1,10 @@
-module RollDice.Parser where
+module RollDice.Parser
+  (
+      RollStatement (..)
+    , parseRollStatement
+    , maybeParseRollStatement
+    , ParseError (..)
+  ) where
 
 import Text.ParserCombinators.Parsec
 
