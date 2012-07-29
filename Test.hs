@@ -11,7 +11,7 @@ main = do
   quickCheck prop_acceptNoBadRolls
   quickCheck prop_rollsFollowRules
   quickCheck prop_goodRollsFollowRules
-
+  quickCheck prop_applyModsWork
 
 goodRollStatements = [
   "d1", "d2", "d6", "d8", "d20", "d100",
@@ -29,6 +29,20 @@ badRollStatements = [
 prop_acceptAllGoodRolls = forAll (elements goodRollStatements) (\s -> (isJust . maybeParseRollStatement) s == True)
 
 prop_acceptNoBadRolls = forAll (elements badRollStatements) (\s -> (isJust . maybeParseRollStatement) s == False)
+
+prop_applyModsWork i =
+    forAll (elements modExamples)
+      (\(str, result) ->
+        case rollRoll (mkStdGen i) str of
+          Left e -> False
+          Right result' -> [result] == result')
+  where modExamples = [
+          ("1d1*2", 2),
+          ("1d1*10", 10),
+          ("1d1*2+3*2", 10),
+          ("1d1+2+3+1*3", 21),
+          ("1d1-10", -9) ]
+
 
 -- | For a given roll with ndrops > ndice, it should
 -- | be within certain bounds. Verify this.

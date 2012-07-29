@@ -90,7 +90,10 @@ modfun = do
         '*' -> (*)
         '+' -> (+)
         '-' -> (-)
-  return (fun  (read operand))
+  -- ((-) 10) will subtract a number from 10. We
+  -- want the opposite (subtract 10 from a number),
+  -- so flip the arguments.
+  return ((flip fun)  (read operand))
 
 
 -- dummyRollStatement = RollStatement {
